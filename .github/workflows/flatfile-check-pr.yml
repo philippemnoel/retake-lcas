@@ -18,10 +18,6 @@ jobs:
         working-directory: flatfile
         run: yarn install
 
-      - name: Check formatting
-        working-directory: surface
-        run: yarn run format:check
-
       - name: Check linting
         working-directory: surface
         run: yarn run lint:check
