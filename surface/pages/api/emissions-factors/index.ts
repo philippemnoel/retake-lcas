@@ -235,7 +235,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
       if (lcaIds !== undefined) {
         lcaIds.forEach((lcaId: string) => {
-          asyncUpdateLCAResults(lcaId, orgId)
+          asyncUpdateLCAResults(lcaId)
         })
       }
 
