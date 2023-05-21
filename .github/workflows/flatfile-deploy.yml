@@ -20,7 +20,11 @@ jobs:
           node-version: "18"
 
       - name: Install Flatfile CLI
-        run: npm install -g flatfile
+        run: yarn global add flatfile
+
+      - name: Install dependencies
+        working-directory: flatfile
+        run: yarn install
 
       - name: Deploy to Flatfile
         working-directory: flatfile
