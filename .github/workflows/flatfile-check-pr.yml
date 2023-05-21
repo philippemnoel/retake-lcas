@@ -1,4 +1,4 @@
-name: "Surface: Check PR"
+name: "Flatfile: Check PR"
 
 on:
   pull_request:
