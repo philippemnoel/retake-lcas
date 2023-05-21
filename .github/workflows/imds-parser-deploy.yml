@@ -24,6 +24,7 @@ jobs:
         uses: "google-github-actions/setup-gcloud@v1"
 
       - name: Deploy to Cloud Run
+        working-directory: cloud/imds_parser
         run: |
           gcloud run deploy imdsparser --region us-central1 --source .
         env:
