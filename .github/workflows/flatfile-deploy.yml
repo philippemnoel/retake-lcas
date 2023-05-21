@@ -37,5 +37,5 @@ jobs:
           flatfile publish src/product/index.ts
         env:
           FLATFILE_TEAM_ID: ${{ secrets.FLATFILE_TEAM_ID }}
-          FLATFILE_ACCESS_KEY_ID: ${{ secrets.FLATFILE_API_KEY }}
-          FLATFILE_SECRET: ${{ secrets.FLATFILE_ENVIRONMENT_ID }}
+          FLATFILE_ACCESS_KEY_ID: ${{ secrets.FLATFILE_ACCESS_KEY_ID }}
+          FLATFILE_SECRET: ${{ secrets.FLATFILE_SECRET }}
