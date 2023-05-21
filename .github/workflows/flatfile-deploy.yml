@@ -30,7 +30,7 @@ jobs:
           elif [[ "${{ github.ref }}" == "refs/heads/prod" ]]; then
             export FLATFILE_ENV=prod
           fi
-          flatfile publish
+          flatfile publish src/product/index.ts
         env:
           FLATFILE_TEAM_ID: ${{ secrets.FLATFILE_TEAM_ID }}
           FLATFILE_ACCESS_KEY_ID: ${{ secrets.FLATFILE_API_KEY }}
