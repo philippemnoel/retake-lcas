@@ -40,7 +40,7 @@ pbcopy < ~/.ssh/id_ed25519.pub
 
 ### Branch Conventions
 
-- `main` -- This branch is for Stable channel only, do not push to it.
+- `prod` -- This branch is for Stable channel only, do not push to it.
 - `staging` -- TBD, will be created in the future.
 - `dev` -- This is our main development branch, and PRs should be made to this branch.
 - All other branches are considered feature branches. They should be forked off of `dev` and PR-ed into `dev`.
@@ -55,4 +55,4 @@ When opening a PR, please ensure that the PR title adheres to the format outline
 
 ## Publishing
 
-Both `dev` and `main` get deployed automatically via GitHub Actions to our respective environments on every push to the respective branches.
+Both `dev` and `prod` get deployed automatically via GitHub Actions to our respective environments on every push to the respective branches.
