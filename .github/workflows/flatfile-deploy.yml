@@ -1,0 +1,37 @@
+name: "Deploy to Flatfile"
+
+on:
+  push:
+    branches:
+      - dev
+      - prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Install Flatfile CLI
+        run: npm install -g flatfile
+
+      - name: Deploy to Flatfile
+        working-directory: flatfile
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            export FLATFILE_ENV=test
+          elif [[ "${{ github.ref }}" == "refs/heads/prod" ]]; then
+            export FLATFILE_ENV=prod
+          fi
+          flatfile publish
+        env:
+          FLATFILE_TEAM_ID: ${{ secrets.FLATFILE_TEAM_ID }}
+          FLATFILE_ACCESS_KEY_ID: ${{ secrets.FLATFILE_API_KEY }}
+          FLATFILE_SECRET: ${{ secrets.FLATFILE_ENVIRONMENT_ID }}

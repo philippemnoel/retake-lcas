@@ -1,0 +1,6 @@
+{
+  "python.formatting.provider": "black",
+  "eslint.workingDirectories": [
+    "emissions_factors"
+  ]
+}

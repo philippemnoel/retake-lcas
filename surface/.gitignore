@@ -1,0 +1,16 @@
+.env.local
+.env.prod
+.vercel
+.next/
+next-env.d.ts
+node_modules/
+.DS_Store
+
+# Yarn error logs
+yarn-error.log
+
+# In case npm is accidentally used instead of yarn
+package-lock.json
+
+# Supabase folder
+supabase/

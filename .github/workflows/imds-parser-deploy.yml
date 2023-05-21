@@ -1,0 +1,29 @@
+# Tech Debt: Create separate GCP dev/prod deploys with auth
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - dev
+      - prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCP_IMDS_PARSER_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy imdsparser-dev --region us-central1 --source .
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_IMDS_PARSER_SA_KEY }}
+          GCLOUD_PROJECT: ${{ secrets.GCP_PROJECT_ID }}

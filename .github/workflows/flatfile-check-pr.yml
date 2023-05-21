@@ -1,0 +1,27 @@
+name: "Surface: Check PR"
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - prod
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        working-directory: flatfile
+        run: yarn install
+
+      - name: Check formatting
+        working-directory: surface
+        run: yarn run format:check
+
+      - name: Check linting
+        working-directory: surface
+        run: yarn run lint:check
