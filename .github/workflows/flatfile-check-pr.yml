@@ -19,5 +19,5 @@ jobs:
         run: yarn install
 
       - name: Check linting
-        working-directory: surface
+        working-directory: flatfile
         run: yarn run lint:check
