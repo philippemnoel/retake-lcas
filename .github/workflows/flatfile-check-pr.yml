@@ -5,6 +5,8 @@ on:
     branches:
       - dev
       - prod
+    paths:
+      - "flatfile/**"
 
 jobs:
   lint:
@@ -18,10 +20,6 @@ jobs:
         working-directory: flatfile
         run: yarn install
 
-      - name: Check formatting
-        working-directory: surface
-        run: yarn run format:check
-
       - name: Check linting
-        working-directory: surface
+        working-directory: flatfile
         run: yarn run lint:check

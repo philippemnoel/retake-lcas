@@ -41,7 +41,6 @@
     "jest": "^28.1.2",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.10",
-    "prettier": "^2.7.1",
     "ts-jest": "^28.0.5"
   },
   "dependencies": {
