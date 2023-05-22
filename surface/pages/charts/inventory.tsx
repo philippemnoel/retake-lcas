@@ -49,7 +49,9 @@ const ImpactChart = ({
     products?.map((product) => ({
       Description: truncateText(
         `${product.part_description} ${
-          product.supplier_name && `(${product.supplier_name})`
+          (product.supplier_name ?? "") !== ""
+            ? `(${product.supplier_name})`
+            : ""
         }`,
         yAxisCharacterLimit
       ),
