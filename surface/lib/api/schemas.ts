@@ -141,6 +141,16 @@ const UsePhaseSchema = z.object({
   ]),
 })
 
+const LCACompletionSchema = z.object({
+  lca_id: z.string(),
+  org_id: z.string(),
+  materials_completed: z.boolean().optional().nullable(),
+  use_phase_completed: z.boolean().optional().nullable(),
+  transportation_completed: z.boolean().optional().nullable(),
+  disposal_completed: z.boolean().optional().nullable(),
+  end_of_life_completed: z.boolean().optional().nullable(),
+})
+
 const WithSupplierIdsSchema = z.object({
   supplier_ids: z.array(z.string()).optional().nullable(),
 })
@@ -449,6 +459,7 @@ export {
   TransportationDataSchema,
   MaterialCompositionDataSchema,
   OrganizationSchema,
+  LCACompletionSchema,
   SupabaseDownloadSchema,
   SlackEPDDataSchema,
   SupplierEngagementDataSchema,

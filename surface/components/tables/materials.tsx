@@ -221,7 +221,7 @@ export default ({
     if (componentWeightDrawerOpen) refreshSelectedSuppliers()
   }, [componentWeightDrawerOpen])
 
-  if (materials === undefined)
+  if (materials === undefined || !user?.org_id)
     return (
       <Card shadow={false}>
         <Skeleton />

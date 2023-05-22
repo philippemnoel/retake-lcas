@@ -170,7 +170,7 @@ export default ({
     refresh()
   }
 
-  if (data === undefined)
+  if (data === undefined || !user?.org_id)
     return (
       <Card shadow={false}>
         <Skeleton />

@@ -1,10 +1,10 @@
 import { post } from "."
-import { CMLTotalResultsSchema } from "./schemas"
+import { LCACompletionSchema } from "./schemas"
 import { CMLTotalResultsData } from "lib/types/supabase-row.types"
 
 const updateLCA = (values: Partial<CMLTotalResultsData>) => {
   try {
-    const parsed = CMLTotalResultsSchema.parse(values)
+    const parsed = LCACompletionSchema.parse(values)
     return Promise.all([
       post(
         `/api/supabase/${parsed.org_id}/update/cml_total_results?lca_id=${parsed.lca_id}`,
