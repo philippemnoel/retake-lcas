@@ -6,6 +6,12 @@ on:
     branches:
       - dev
       - prod
+  pull_request:
+    branches:
+      - dev
+      - prod
+    paths:
+      - .github/workflows/imds-parser-deploy.yml
 
 jobs:
   deploy:
