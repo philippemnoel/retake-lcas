@@ -188,7 +188,7 @@ export default ({
     refresh()
   }
 
-  if (serviceLife === undefined || usePhase === undefined)
+  if (serviceLife === undefined || usePhase === undefined || !user?.org_id)
     return (
       <Card shadow={false}>
         <Skeleton />

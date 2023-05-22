@@ -146,7 +146,7 @@ export default ({
     refresh()
   }
 
-  if (data === undefined || part === undefined)
+  if (data === undefined || part === undefined || !user?.org_id)
     return (
       <Card shadow={false}>
         <Skeleton />
