@@ -22,7 +22,7 @@ const config = {
     BOM_EMBED_ID: process.env.BOM_EMBED_ID,
     MATERIALS_EMBED_ID: process.env.MATERIALS_EMBED_ID,
     BOM_LIST_EMBED_ID: process.env.BOM_LIST_EMBED_ID,
-    SUPPLIERS_EMBED_ID: process.env.SUPPLIERS_EMBED_ID,
+    SUPPLIER_EMBED_ID: process.env.SUPPLIER_EMBED_ID,
     TYPEFORM_TOKEN: process.env.TYPEFORM_TOKEN,
     BASE_URL: process.env.AUTH0_BASE_URL,
     RETAKE_ENV: process.env.RETAKE_ENV,
