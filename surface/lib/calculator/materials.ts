@@ -1860,16 +1860,18 @@ const ecoinvent = [
   "Zirconium tetrachloride",
 ]
 
-const general = [
-  "Polyvinylchloride / PVC (general)",
-  "Metal (general)",
-  "Plastic (general) ",
-  "Copper (general)",
-  "Glass (general)",
-  "Iron (general)",
-  "Fabric / Cloth (general)",
-  "Steel (general)",
-  "Acrylonitrile-butadiene-styrene (ABS)",
-]
+const generalMaterials = {
+  "Polyvinylchloride / PVC (general)": "Polyvinylchloride, bulk polymerised",
+  "Metal (general)": "Aluminium alloy, alli",
+  "Plastic (general)": "Polyethylene, high density, granulate",
+  "Copper (general)": "Copper-rich materials",
+  "Glass (general)": "Flat glass, coated",
+  "Iron (general)": "Cast iron",
+  "Fabric / Cloth (general)": "Textile, nonwoven polyester",
+  "Steel (general)": "Steel, unalloyed",
+  "Acrylonitrile-butadiene-styrene (ABS)":
+    "Acrylonitrile-butadiene-styrene copolymer",
+} as Record<string, string>
 
-export default [...general, ...ecoinvent]
+export { generalMaterials }
+export default [...Object.keys(generalMaterials), ...ecoinvent].sort()

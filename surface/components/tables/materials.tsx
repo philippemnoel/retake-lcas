@@ -259,6 +259,8 @@ export default ({
           setMaterialDrawerOpen(false)
         }}
         onSave={async () => {
+          setMaterialDrawerOpen(false)
+
           const partsWithPartId = withRetakePartId(partsData)
           await withNotification([
             onSaveParts(partsWithPartId),
@@ -270,8 +272,8 @@ export default ({
             }),
             markIncomplete(),
           ]).then(refreshAll)
+          setPartsData(undefined)
           setMaterialCompositionData(undefined)
-          setMaterialDrawerOpen(false)
         }}
         partsData={partsData}
         materialCompositionData={materialCompositionData}
@@ -298,6 +300,8 @@ export default ({
           setIsNewComponent(false)
         }}
         onSave={() => {
+          setComponentDrawerOpen(false)
+
           const partsWithRetakeId = withRetakePartId(partsData)
 
           withNotification([
@@ -312,7 +316,6 @@ export default ({
           ]).then(refreshAll)
           setMaterialCompositionData(undefined)
           setPartsData(undefined)
-          setComponentDrawerOpen(false)
           setIsNewComponent(false)
         }}
         onChangeMaterialComposition={(data) => {
@@ -357,16 +360,18 @@ export default ({
           })
         }}
         onSave={() => {
+          setComponentWeightDrawerOpen(false)
+
           withNotification([
             onSaveMaterialComposition(materialCompositionData ?? {}),
             onSaveParts(partsData ?? {}),
             markIncomplete(),
           ]).then(refreshAll)
           setMaterialCompositionData(undefined)
-          setComponentWeightDrawerOpen(false)
         }}
         onDismiss={() => {
           setComponentWeightDrawerOpen(false)
+          setMaterialCompositionData(undefined)
         }}
         onClickEdit={() => {
           setComponentWeightDrawerOpen(false)
@@ -392,7 +397,10 @@ export default ({
           })
         }}
         onSave={() => {
+          setComponentDropdownOpen(false)
+
           const partsWithPartId = withRetakePartId(partsData)
+
           withNotification([
             onSaveParts(partsWithPartId, false),
             onSaveMaterialComposition({
@@ -405,7 +413,6 @@ export default ({
           ]).then(refreshAll)
           setMaterialCompositionData(undefined)
           setPartsData(undefined)
-          setComponentDropdownOpen(false)
         }}
         onCreate={() => {
           setComponentDropdownOpen(false)

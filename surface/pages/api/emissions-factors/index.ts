@@ -1,10 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import { PineconeClient, type QueryRequest } from "@pinecone-database/pinecone"
+
+import { asyncUpdateLCAResults } from "../supabase/[org_id]/results/utils"
+
 import { supabase } from "lib/api/supabase"
 import { createEmbedding } from "./gpt"
 import { createClient } from "redis"
 import { type Database } from "lib/types/database.types"
-import { asyncUpdateLCAResults } from "../supabase/[org_id]/results/utils"
+import { generalMaterials } from "lib/calculator/materials"
 
 // TODO: find a cleaner way for optional type params
 type Part = {
@@ -110,6 +113,11 @@ async function computeEmissionFactor(
 
     primaryVector = descriptionVector
   } else {
+    // If the user selected a general material, map the general material to an Ecoinvent material
+    if (Object.keys(generalMaterials).includes(part.primary_material ?? "")) {
+      part.primary_material = generalMaterials[part.primary_material ?? ""]
+    }
+
     const materialVector = await createEmbedding(part.primary_material ?? "")
     if (materialVector == null) {
       throw new Error("failed to get part material vector")
@@ -164,6 +172,7 @@ async function computeEmissionFactor(
   const result =
     factors.find((f) => factorLocation && f.location === factorLocation) ||
     factors.find((f) => f.location === "China") ||
+    factors.find((f) => f.location === "Global") ||
     factors.find((f) => f.location === "Rest-of-World") ||
     factors.find((f) => f.location === "Europe") ||
     factors[0]
