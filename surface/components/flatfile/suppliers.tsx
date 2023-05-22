@@ -12,13 +12,14 @@ export default () => {
 
   return (
     <Flatfile
-      embedId={process.env.SUPPLIERS_EMBED_ID ?? ""}
+      embedId={process.env.SUPPLIER_EMBED_ID ?? ""}
       onChunk={async (chunk) => {
         const rows = chunk.records.map((row) => row.data)
         const suppliers = rows.map((row) => ({
+          id: `${row.name}-${user?.org_id}`,
           name: row.name?.toString(),
-          website: row.website?.toString(),
-          ...(row.email && { contact: [row.email] }),
+          website: row.website?.toString() ?? null,
+          contacts: row.email ? [row.email.toString()] : [],
           org_id: user?.org_id,
         }))
 
