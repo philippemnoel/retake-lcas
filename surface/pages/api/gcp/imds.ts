@@ -1,21 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import { withApiAuthRequired } from "@auth0/nextjs-auth0"
-import { GoogleAuth } from "google-auth-library"
 import { supabase } from "lib/api/supabase"
+
+import { post } from "lib/api"
 
 const parserFunctionUrl = process.env.MDS_PARSER_FUNCTION_URL ?? ""
 
-async function request(auth: GoogleAuth, body: any): Promise<any> {
-  console.info(
-    `request ${parserFunctionUrl} with target audience ${parserFunctionUrl}`
-  )
-  const client = await auth.getIdTokenClient(parserFunctionUrl)
-  return await client.request({
-    method: "POST",
-    url: parserFunctionUrl,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  })
+async function request(body: any): Promise<any> {
+  return await post(parserFunctionUrl, body)
 }
 
 export default withApiAuthRequired(
@@ -31,13 +23,6 @@ export default withApiAuthRequired(
           return
         }
 
-        const auth = new GoogleAuth({
-          credentials: {
-            client_email: process.env.IMDS_CLIENT_EMAIL,
-            private_key: process.env.IMDS_PRIVATE_KEY,
-          },
-        })
-
         console.log(
           `Processing documents for orgId ${orgId}, invoking mds parser`
         )
@@ -48,7 +33,7 @@ export default withApiAuthRequired(
             .from(doc.bucket)
             .getPublicUrl(doc.path)
 
-          const mdsParserResponse = await request(auth, {
+          const mdsParserResponse = await request({
             org_id: orgId,
             lca_id: lcaId,
             file_url: data.publicUrl,

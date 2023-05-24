@@ -27,6 +27,3 @@ jobs:
         working-directory: cloud/imds_parser
         run: |
           gcloud run deploy imdsparser --region us-central1 --source .
-        env:
-          GCP_SA_KEY: ${{ secrets.GCP_IMDS_PARSER_SA_KEY }}
-          GCLOUD_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
