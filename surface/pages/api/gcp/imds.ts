@@ -7,17 +7,6 @@ import { post } from "lib/api"
 const parserFunctionUrl = process.env.MDS_PARSER_FUNCTION_URL ?? ""
 
 async function request(body: any): Promise<any> {
-  // console.info(
-  //   `request ${parserFunctionUrl} with target audience ${parserFunctionUrl}`
-  // )
-  // const client = await auth.getIdTokenClient(parserFunctionUrl)
-  // return await client.request({
-  //   method: "POST",
-  //   url: parserFunctionUrl,
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(body),
-  // })
-
   return await post(parserFunctionUrl, body)
 }
 
@@ -33,8 +22,6 @@ export default withApiAuthRequired(
           res.status(400).end()
           return
         }
-
-        // const auth = new GoogleAuth()
 
         console.log(
           `Processing documents for orgId ${orgId}, invoking mds parser`
