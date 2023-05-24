@@ -15,7 +15,7 @@ const MaterialSheetName = "Materials"
 const SupplierSheetName = "Suppliers"
 
 const BOM = new Sheet(BOMSheetName, {
-  part_id: RequiredTextField({
+  part_id: TextField({
     label: "Part Identifier or Code",
   }),
   description: RequiredTextField({
