@@ -61,6 +61,7 @@ import {
   SupplierData,
 } from "lib/types/supabase-row.types"
 import { Methodology } from "lib/calculator/methodologies"
+import { withRetakePartId } from "lib/calculator/data"
 
 export default ({
   lcaID,
@@ -110,24 +111,17 @@ export default ({
       material.level === (parent?.level ?? 1) + 1 &&
       material.parent_id === parent?.id
   )
-  const sortedMaterials = sortBy(materials, "weight_grams").reverse()
+  const sortedMaterials = sortBy(materials, (obj) => {
+    if (!obj.weight_grams) return Number.POSITIVE_INFINITY
+    return -obj.weight_grams
+  })
+
   const totalPercentWeight = Math.round(
     (sumBy(materials, "weight_grams") * 100) / (parent?.weight_grams ?? 1)
   )
   const weightTooLow = totalPercentWeight < 95
   const weightTooHigh = totalPercentWeight > 100
   const canMarkComplete = !weightTooLow && !weightTooHigh
-
-  const withRetakePartId = <
-    T extends Record<string, any> & { retake_part_id?: string | null }
-  >(
-    values?: T
-  ): T => ({
-    ...(values as T),
-    retake_part_id:
-      values?.retake_part_id ??
-      `${values?.customer_part_id ?? uuidv4()}-${user?.org_id}`,
-  })
 
   const onSaveMaterialComposition = (
     values: Partial<MaterialCompositionWithImpacts>
@@ -261,7 +255,7 @@ export default ({
         onSave={async () => {
           setMaterialDrawerOpen(false)
 
-          const partsWithPartId = withRetakePartId(partsData)
+          const partsWithPartId = withRetakePartId(partsData, user?.org_id)
           await withNotification([
             onSaveParts(partsWithPartId),
             onSaveMaterialComposition({
@@ -302,7 +296,7 @@ export default ({
         onSave={() => {
           setComponentDrawerOpen(false)
 
-          const partsWithRetakeId = withRetakePartId(partsData)
+          const partsWithRetakeId = withRetakePartId(partsData, user?.org_id)
 
           withNotification([
             onSaveParts(partsWithRetakeId),
@@ -399,7 +393,7 @@ export default ({
         onSave={() => {
           setComponentDropdownOpen(false)
 
-          const partsWithPartId = withRetakePartId(partsData)
+          const partsWithPartId = withRetakePartId(partsData, user?.org_id)
 
           withNotification([
             onSaveParts(partsWithPartId, false),
@@ -564,7 +558,7 @@ export default ({
                     </TableCell>
                     <TableCell>
                       <div
-                        className="flex space-x-4 cursor-pointer"
+                        className="flex space-x-4 cursor-pointer max-w-xs"
                         onClick={() => openComponentWeightDrawer(item)}
                       >
                         {item.part_description && (
