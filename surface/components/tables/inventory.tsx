@@ -74,6 +74,7 @@ export default () => {
   const [showPartDrawer, setShowPartDrawer] = useState(false)
   const [showPartDetailedDrawer, setShowPartDetailedDrawer] = useState(false)
   const [showSupplierDrawer, setShowSupplierDrawer] = useState(false)
+  const [supplierEditOnly, setSupplierEditOnly] = useState(false)
   const [filterSuppliers, setFilterSuppliers] = useState<Array<SupplierData>>(
     []
   )
@@ -260,6 +261,7 @@ export default () => {
           setSuppliersDraft(undefined)
           setShowPartDetailedDrawer(false)
           setShowSupplierDrawer(true)
+          setSupplierEditOnly(false)
         }}
       />
       <RequestDrawer
@@ -272,6 +274,7 @@ export default () => {
         onEngageSupplier={onEngageSupplier}
         onEditSupplier={(supplier) => {
           setSuppliersDraft(supplier)
+          setSupplierEditOnly(true)
           setShowSupplierDrawer(true)
         }}
       />
@@ -290,7 +293,7 @@ export default () => {
           setShowSupplierDrawer(false)
           setSuppliersDraft(undefined)
         }}
-        editOnly={true}
+        editOnly={supplierEditOnly}
       />
       <div className="fixed w-[calc(100%-3rem)] lg:w-[calc(100%-20rem)] bg-white z-10 top-[3.75rem] py-4">
         <div className="flex justify-between">
