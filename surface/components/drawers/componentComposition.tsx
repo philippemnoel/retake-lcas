@@ -15,7 +15,8 @@ import {
 } from "@heroicons/react/24/outline"
 import classNames from "classnames"
 
-import NumberInput from "../inputs/number"
+import NumberInput from "@/components/inputs/number"
+
 import {
   PartsData,
   MaterialCompositionData,
@@ -37,6 +38,11 @@ type Props = {
 }
 
 export default (props: Props) => {
+  const percentWeight = props.maxWeight
+    ? ((props.materialCompositionData?.weight_grams || 0) * 100) /
+      props.maxWeight
+    : 0
+
   return (
     <>
       <div className="absolute top-0 right-0">
@@ -106,7 +112,7 @@ export default (props: Props) => {
               onValueChange={(value) =>
                 props.onChangeMaterialComposition({ weight_grams: value })
               }
-              hint="grams"
+              hint={`grams (${Math.round(percentWeight)}%)`}
               maxValue={props.maxWeight ?? undefined}
             />
             {props.supplierData && props.supplierData.length > 0 && (

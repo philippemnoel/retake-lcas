@@ -32,6 +32,11 @@ type Props = {
 }
 
 export default (props: Props) => {
+  const percentWeight = props.maxWeight
+    ? ((props.materialCompositionData?.weight_grams || 0) * 100) /
+      props.maxWeight
+    : 0
+
   return (
     <>
       <div className="absolute top-0 right-0">
@@ -94,7 +99,7 @@ export default (props: Props) => {
               onValueChange={(value) =>
                 props.onChangeMaterialComposition({ weight_grams: value })
               }
-              hint="grams"
+              hint={`grams (${Math.round(percentWeight)}%)`}
               maxValue={props.maxWeight}
             />
             <div className="absolute bottom-0">

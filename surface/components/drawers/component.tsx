@@ -60,6 +60,11 @@ export default (props: Props) => {
     ...(partsValues?.origin ? [partsValues.origin] : []),
   ])
 
+  const percentWeight = props.maxWeight
+    ? ((props.materialCompositionData?.weight_grams || 0) * 100) /
+      props.maxWeight
+    : 0
+
   useEffect(() => {
     // On the first render, the "connected" child components will load their data.
     // When this useEffect fires for the first time, the loading will have been initialized.
@@ -144,7 +149,7 @@ export default (props: Props) => {
               onValueChange={(value) =>
                 props.onChangeMaterialComposition({ weight_grams: value })
               }
-              hint="grams"
+              hint={`grams (${Math.round(percentWeight)}%)`}
               maxValue={props.maxWeight}
             />
             <Flex marginTop="mt-4">
