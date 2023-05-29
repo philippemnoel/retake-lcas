@@ -96,7 +96,7 @@ export default (props: Props) => {
             {props.partsData?.primary_material && (
               <>
                 <Text truncate={true} marginTop="mt-4">
-                  <Bold>Primary Material</Bold>
+                  <Bold>Material</Bold>
                 </Text>
                 <Text marginTop="mt-1">
                   {props.partsData?.primary_material ?? "Not specified"}

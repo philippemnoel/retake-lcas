@@ -1212,6 +1212,7 @@ export interface Database {
       }
       parts: {
         Row: {
+          category: string | null
           created_at: string | null
           customer_part_id: string | null
           is_base_material: boolean
@@ -1225,6 +1226,7 @@ export interface Database {
           supplier_ids: string[] | null
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
           customer_part_id?: string | null
           is_base_material?: boolean
@@ -1238,6 +1240,7 @@ export interface Database {
           supplier_ids?: string[] | null
         }
         Update: {
+          category?: string | null
           created_at?: string | null
           customer_part_id?: string | null
           is_base_material?: boolean
@@ -2229,6 +2232,7 @@ export interface Database {
         Row: {
           activity_name: string | null
           activity_type: string | null
+          category: string | null
           cml_ac: number | null
           cml_ad: number | null
           cml_ad_ff: number | null
@@ -2302,6 +2306,7 @@ export interface Database {
         Insert: {
           activity_name?: string | null
           activity_type?: string | null
+          category?: string | null
           cml_ac?: number | null
           cml_ad?: number | null
           cml_ad_ff?: number | null
@@ -2375,6 +2380,7 @@ export interface Database {
         Update: {
           activity_name?: string | null
           activity_type?: string | null
+          category?: string | null
           cml_ac?: number | null
           cml_ad?: number | null
           cml_ad_ff?: number | null
@@ -2637,6 +2643,7 @@ export interface Database {
           abiotic_depletion_fossil_fuels: number | null
           acidification: number | null
           activity_name: string | null
+          category: string | null
           created_at: string | null
           customer_part_id: string | null
           database_name: string | null
@@ -2847,6 +2854,7 @@ export interface Database {
       }
       parts_by_supplier: {
         Row: {
+          category: string | null
           created_at: string | null
           customer_part_id: string | null
           is_base_material: boolean | null
@@ -2861,6 +2869,7 @@ export interface Database {
       }
       parts_by_supplier_with_factors: {
         Row: {
+          category: string | null
           created_at: string | null
           customer_part_id: string | null
           factor_id: string | null
@@ -3632,7 +3641,7 @@ export interface Database {
         Args: {
           "": string
         }
-        Returns: unknown
+        Returns: string[]
       }
       validate_organization_name: {
         Args: {
@@ -3652,10 +3661,7 @@ export interface Database {
     Tables: {
       buckets: {
         Row: {
-          allowed_mime_types: string[] | null
-          avif_autodetection: boolean | null
           created_at: string | null
-          file_size_limit: number | null
           id: string
           name: string
           owner: string | null
@@ -3663,10 +3669,7 @@ export interface Database {
           updated_at: string | null
         }
         Insert: {
-          allowed_mime_types?: string[] | null
-          avif_autodetection?: boolean | null
           created_at?: string | null
-          file_size_limit?: number | null
           id: string
           name: string
           owner?: string | null
@@ -3674,10 +3677,7 @@ export interface Database {
           updated_at?: string | null
         }
         Update: {
-          allowed_mime_types?: string[] | null
-          avif_autodetection?: boolean | null
           created_at?: string | null
-          file_size_limit?: number | null
           id?: string
           name?: string
           owner?: string | null
@@ -3716,7 +3716,6 @@ export interface Database {
           owner: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          version: string | null
         }
         Insert: {
           bucket_id?: string | null
@@ -3728,7 +3727,6 @@ export interface Database {
           owner?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          version?: string | null
         }
         Update: {
           bucket_id?: string | null
@@ -3740,7 +3738,6 @@ export interface Database {
           owner?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          version?: string | null
         }
       }
     }
@@ -3748,15 +3745,6 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      can_insert_object: {
-        Args: {
-          bucketid: string
-          name: string
-          owner: string
-          metadata: Json
-        }
-        Returns: undefined
-      }
       extension: {
         Args: {
           name: string
@@ -3773,7 +3761,7 @@ export interface Database {
         Args: {
           name: string
         }
-        Returns: unknown
+        Returns: string[]
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
@@ -3811,3 +3799,4 @@ export interface Database {
     }
   }
 }
+

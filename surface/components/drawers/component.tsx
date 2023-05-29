@@ -12,13 +12,14 @@ import {
   SelectBoxItem,
 } from "@tremor/react"
 import { Bars3BottomLeftIcon } from "@heroicons/react/24/outline"
+import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid"
 import classNames from "classnames"
+import uniq from "lodash.uniq"
 
 import { regions } from "lib/calculator/factors"
 import ConnectedCombobox from "../inputs/connectedSelectBox"
+import ConnectedMaterials from "../inputs/connectedMaterials"
 import NumberInput from "../inputs/number"
-import materials from "lib/calculator/materials"
-import uniq from "lodash.uniq"
 import {
   MaterialCompositionData,
   PartsData,
@@ -49,11 +50,6 @@ export default (props: Props) => {
     : [partsValues?.customer_part_id, partsValues?.part_description].every(
         (value) => value !== undefined
       ) && (materialCompositionValues?.weight_grams ?? 0) > 0
-
-  const materialOptions = uniq([
-    ...materials,
-    ...(partsValues?.primary_material ? [partsValues.primary_material] : []),
-  ])
 
   const regionOptions = uniq([
     ...regions.map((region) => region.name),
@@ -103,135 +99,128 @@ export default (props: Props) => {
               <Title>Component</Title>
             </Flex>
             <Divider />
-            {!(
-              props.partsData?.primary_material &&
-              !props.partsData?.customer_part_id
-            ) && (
-              <>
-                <Text truncate={true}>
-                  <Bold>Identifier / SKU *</Bold>
-                </Text>
-                {!props.isNewComponent ? (
-                  <Text marginTop="mt-1">{partsValues?.customer_part_id}</Text>
-                ) : (
+            <div className="max-h-[calc(100vh-12rem)] overflow-y-scroll px-1">
+              <Text color="indigo">
+                <Bold>Required Fields</Bold>
+              </Text>
+              {!props.partsData?.is_base_material && (
+                <>
+                  <Text truncate={true} marginTop="mt-2">
+                    <Bold>Identifier / SKU *</Bold>
+                  </Text>
+                  {!props.isNewComponent ? (
+                    <Text marginTop="mt-1">
+                      {partsValues?.customer_part_id}
+                    </Text>
+                  ) : (
+                    <TextInput
+                      marginTop="mt-1"
+                      value={partsValues?.customer_part_id?.toString() ?? ""}
+                      onChange={(event) =>
+                        props.onChangeParts({
+                          customer_part_id: event.target.value,
+                        })
+                      }
+                      placeholder="SKU-123456"
+                    />
+                  )}
+                  <Text marginTop="mt-4">
+                    <Bold>Description *</Bold>
+                  </Text>
                   <TextInput
                     marginTop="mt-1"
-                    value={partsValues?.customer_part_id?.toString() ?? ""}
+                    value={partsValues?.part_description?.toString() ?? ""}
                     onChange={(event) =>
                       props.onChangeParts({
-                        customer_part_id: event.target.value,
+                        part_description: event.target.value,
                       })
                     }
-                    placeholder="SKU-123456"
+                    placeholder="Widget Subcomponent"
                   />
-                )}
-                <Text marginTop="mt-4">
-                  <Bold>Description *</Bold>
-                </Text>
-                <TextInput
-                  marginTop="mt-1"
-                  value={partsValues?.part_description?.toString() ?? ""}
-                  onChange={(event) =>
-                    props.onChangeParts({
-                      part_description: event.target.value,
-                    })
-                  }
-                  placeholder="Widget Subcomponent"
-                />
-              </>
-            )}
-            <Text marginTop="mt-4">
-              <Bold>Weight (grams) *</Bold>
-            </Text>
-            <NumberInput
-              marginTop="mt-1"
-              value={materialCompositionValues?.weight_grams ?? 0}
-              onValueChange={(value) =>
-                props.onChangeMaterialComposition({ weight_grams: value })
-              }
-              hint={`grams (${Math.round(percentWeight)}%)`}
-              maxValue={props.maxWeight}
-            />
-            <Flex marginTop="mt-4">
-              <Text>
-                <Bold>Material</Bold>
+                </>
+              )}
+              <Text marginTop="mt-4">
+                <Bold>Weight (grams) *</Bold>
               </Text>
-              {partsValues?.primary_material && (
+              <NumberInput
+                marginTop="mt-1"
+                value={materialCompositionValues?.weight_grams ?? 0}
+                onValueChange={(value) =>
+                  props.onChangeMaterialComposition({ weight_grams: value })
+                }
+                hint={`grams (${Math.round(percentWeight)}%)`}
+                maxValue={props.maxWeight}
+              />
+              <Divider />
+              <Text color="indigo">
+                <Flex>
+                  <Bold>Optional Fields</Bold>
+                  <Icon
+                    icon={QuestionMarkCircleIcon}
+                    color="indigo"
+                    variant="simple"
+                    tooltip="These fields are not required but will help Retake find a more precise emissions factor."
+                  />
+                </Flex>
+              </Text>
+              <ConnectedMaterials
+                data={partsValues}
+                onChange={props.onChangeParts}
+                marginTop="mt-1"
+              />
+              <Text marginTop="mt-4">
+                <Bold>Default Origin</Bold>
+              </Text>
+              <SelectBox
+                marginTop="mt-1"
+                onValueChange={(value: string) =>
+                  props.onChangeParts({ origin: value })
+                }
+                value={partsValues?.origin ?? ""}
+                placeholder="Type to search from list"
+              >
+                {
+                  regionOptions.map((region, index) => (
+                    <SelectBoxItem text={region} value={region} key={index} />
+                  )) as any
+                }
+              </SelectBox>
+              <Flex marginTop="mt-4">
+                <Text>
+                  <Bold>Suppliers</Bold>
+                </Text>
                 <Button
-                  text="Remove"
-                  color="indigo"
+                  text="Create New Supplier"
                   variant="light"
+                  color="indigo"
                   onClick={() => {
-                    props.onChangeParts({ primary_material: null })
+                    // This is a workaround until we can build a more effective drawer/data abstraction.
+                    // When a new supplier is created, the ConnectedCombobox will be out of date.
+                    // The user probably won't know to refresh the page to see the new data, so we'll
+                    // manually invalidate the ConnectedCombobox cache here, forcing a reload when they
+                    // reopen the component drawer.
+                    setDrawerHasOpenedOnce(false)
+                    props.onClickCreateSupplier()
                   }}
                 />
+              </Flex>
+              {drawerHasOpenedOnce && (
+                <ConnectedCombobox
+                  marginTop="mt-1"
+                  endpoint="/api/bulk/suppliers"
+                  selected={partsValues?.supplier_ids ?? []}
+                  onChange={(value) =>
+                    props.onChangeParts({ supplier_ids: value })
+                  }
+                  keyField="id"
+                  displayField="name"
+                  placeholder="Type to search from suppliers"
+                  multiple={true}
+                />
               )}
-            </Flex>
-            <SelectBox
-              marginTop="mt-1"
-              onValueChange={(value) =>
-                props.onChangeParts({ primary_material: value })
-              }
-              value={partsValues?.primary_material}
-              placeholder="Type to search from list"
-            >
-              {
-                materialOptions.map((material, index) => (
-                  <SelectBoxItem text={material} value={material} key={index} />
-                )) as any
-              }
-            </SelectBox>
-            <Text marginTop="mt-4">
-              <Bold>Default Origin</Bold>
-            </Text>
-            <SelectBox
-              marginTop="mt-1"
-              onValueChange={(value: string) =>
-                props.onChangeParts({ origin: value })
-              }
-              value={partsValues?.origin ?? ""}
-              placeholder="Type to search from list"
-            >
-              {
-                regionOptions.map((region, index) => (
-                  <SelectBoxItem text={region} value={region} key={index} />
-                )) as any
-              }
-            </SelectBox>
-            <Flex marginTop="mt-4">
-              <Text>
-                <Bold>Suppliers</Bold>
-              </Text>
-              <Button
-                text="Create New Supplier"
-                variant="light"
-                color="indigo"
-                onClick={() => {
-                  // This is a workaround until we can build a more effective drawer/data abstraction.
-                  // When a new supplier is created, the ConnectedCombobox will be out of date.
-                  // The user probably won't know to refresh the page to see the new data, so we'll
-                  // manually invalidate the ConnectedCombobox cache here, forcing a reload when they
-                  // reopen the component drawer.
-                  setDrawerHasOpenedOnce(false)
-                  props.onClickCreateSupplier()
-                }}
-              />
-            </Flex>
-            {drawerHasOpenedOnce && (
-              <ConnectedCombobox
-                marginTop="mt-1"
-                endpoint="/api/bulk/suppliers"
-                selected={partsValues?.supplier_ids ?? []}
-                onChange={(value) =>
-                  props.onChangeParts({ supplier_ids: value })
-                }
-                keyField="id"
-                displayField="name"
-                placeholder="Type to search from suppliers"
-                multiple={true}
-              />
-            )}
-            <div className="absolute bottom-0">
+            </div>
+            <div className="absolute bottom-0 w-full">
+              <Divider />
               <Flex spaceX="space-x-4">
                 <Button
                   text="Save"

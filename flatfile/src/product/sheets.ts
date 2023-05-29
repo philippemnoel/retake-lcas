@@ -37,7 +37,10 @@ const BOM = new Sheet(BOMSheetName, {
     label: "Manufacturing Process",
   }),
   material: TextField({
-    label: "Primary Material",
+    label: "Material Name",
+  }),
+  category: TextField({
+    label: "Material Category",
   }),
 })
 
@@ -70,7 +73,10 @@ const BOMList = new Sheet(BOMListSheetName, {
     label: "Manufacturing Process",
   }),
   material: TextField({
-    label: "Primary Material",
+    label: "Material Name",
+  }),
+  category: TextField({
+    label: "Material Category",
   }),
 })
 

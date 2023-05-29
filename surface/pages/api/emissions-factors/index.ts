@@ -7,26 +7,11 @@ import { supabase } from "lib/api/supabase"
 import { createEmbedding } from "./gpt"
 import { createClient } from "redis"
 import { type Database } from "lib/types/database.types"
-import { generalMaterials } from "lib/calculator/materials"
-
-// TODO: find a cleaner way for optional type params
-type Part = {
-  retake_part_id: string
-  reference_product_name?: string | null
-  part_description: string | null
-  origin: string | null
-  primary_material: string | null
-}
+import { PartsData } from "lib/types/supabase-row.types"
 
 type PartsThirdPartyFactor =
   Database["public"]["Tables"]["parts_third_party_factors"]["Row"]
 
-const sectorExcludeList = [
-  "Fishing",
-  "Agriculture",
-  "Animal",
-  "Electricity; Waste Treatment & Recycling",
-]
 const activityIncludeList = ["market activity", "market group"]
 
 async function authenticate(apiKey: string): Promise<boolean> {
@@ -71,10 +56,10 @@ async function queryPineconeIndex(vector: number[], namespace: string) {
 
 async function checkIfPartsExist(
   partIds: string[]
-): Promise<{ parts: Part[]; valid: boolean }> {
+): Promise<{ parts: Array<Partial<PartsData>>; valid: boolean }> {
   const { data, error } = await supabase
     .from("parts")
-    .select("retake_part_id,part_description,origin,primary_material")
+    .select("retake_part_id,part_description,origin,category,primary_material")
     .in("retake_part_id", partIds)
   if (error != null) {
     console.error(error.message)
@@ -89,11 +74,12 @@ async function checkIfPartsExist(
 }
 
 async function computeEmissionFactor(
-  part: Part
+  part: Partial<PartsData>
 ): Promise<PartsThirdPartyFactor> {
   if (
     (part.primary_material ?? "") === "" &&
-    (part.part_description ?? "") === ""
+    (part.part_description ?? "") === "" &&
+    (part.category ?? "") === ""
   ) {
     // Skip part if it doesn't have necessary data
     throw new Error(
@@ -104,26 +90,26 @@ async function computeEmissionFactor(
   // Compute the vectors for the relevant columns
   let primaryVector: number[]
   console.log("Creating embedding for", part)
-  if ((part.primary_material ?? "") === "") {
-    // Only if primary_material is null or empty do we use part description
-    const descriptionVector = await createEmbedding(part.part_description ?? "")
-    if (descriptionVector == null) {
-      throw new Error("failed to get part description vector")
-    }
 
-    primaryVector = descriptionVector
+  // Create embedding based on material, category, or description
+  if ((part.primary_material ?? "") !== "") {
+    primaryVector = (await createEmbedding(part.primary_material ?? "")) ?? []
+    if (primaryVector.length === 0) throw new Error("Material vector")
+  } else if (
+    (part.category ?? "") !== "" &&
+    (part.part_description ?? "") !== ""
+  ) {
+    primaryVector =
+      (await createEmbedding(`${part.part_description} (${part.category})`)) ??
+      []
+    if (primaryVector.length === 0)
+      throw new Error("Category/description vector")
+  } else if ((part.part_description ?? "") !== "") {
+    primaryVector = (await createEmbedding(part.part_description ?? "")) ?? []
+    if (primaryVector.length === 0) throw new Error("Description vector")
   } else {
-    // If the user selected a general material, map the general material to an Ecoinvent material
-    if (Object.keys(generalMaterials).includes(part.primary_material ?? "")) {
-      part.primary_material = generalMaterials[part.primary_material ?? ""]
-    }
-
-    const materialVector = await createEmbedding(part.primary_material ?? "")
-    if (materialVector == null) {
-      throw new Error("failed to get part material vector")
-    }
-
-    primaryVector = materialVector
+    primaryVector = (await createEmbedding(part.category ?? "")) ?? []
+    if (primaryVector.length === 0) throw new Error("Category vector")
   }
 
   // Only create a location vector when origin exists in the record
@@ -158,7 +144,6 @@ async function computeEmissionFactor(
     .eq("reference_product_name", factorProductName)
     .eq("reference_unit", "kg")
     .in("activity_type", activityIncludeList)
-    .not("sector", "in", `(${sectorExcludeList.join(",")})`)
 
   if (error != null) {
     console.error(error)
@@ -177,15 +162,18 @@ async function computeEmissionFactor(
     factors.find((f) => f.location === "Europe") ||
     factors[0]
 
-  console.log("Embedding factor", factorProductName, "found", result)
-  return { retake_part_id: part.retake_part_id, factor_id: result.factor_id }
+  // console.log("Embedding factor", factorProductName, "found", result)
+  return {
+    retake_part_id: part.retake_part_id ?? "",
+    factor_id: result.factor_id,
+  }
 }
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const apiKey = req.headers["x-api-key"]
-  const authenicated = await authenticate(apiKey as string)
+  const authenticated = await authenticate(apiKey as string)
 
-  if (!authenicated) {
+  if (!authenticated) {
     res.status(401).end()
     return
   }
@@ -211,17 +199,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         res.status(202).end()
       }
 
-      const FactorsPartsMap = parts.map(async (part: Part) => {
+      const factorResults = []
+      for (const part of parts) {
         try {
-          const factor = await computeEmissionFactor(part)
-          return factor
-        } catch (error) {
-          console.error(`Error processing part ${part.retake_part_id}`)
-          return null
+          const result = await computeEmissionFactor(part)
+          factorResults.push(result)
+        } catch (err) {
+          console.error(`Error processing ${JSON.stringify(part)}`, err)
         }
-      })
+      }
 
-      const factorResults = await Promise.all(FactorsPartsMap)
       const upsertData = factorResults.filter(
         (factor): factor is PartsThirdPartyFactor => factor !== null
       )

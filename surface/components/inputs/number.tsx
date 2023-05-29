@@ -64,7 +64,7 @@ export default ({
       <input
         type="text"
         className={classNames(
-          "w-full rounded-md bg-white ring-1 border-none py-1.5 focus:border-none text-sm py-2",
+          "w-full rounded-md bg-white ring-1 border-none px-4 focus:border-none text-sm py-2",
           marginTop && marginTop,
           warning
             ? "ring-red-500 focus:ring-red-500"

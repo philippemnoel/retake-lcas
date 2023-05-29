@@ -9,6 +9,7 @@ const PartsDataSchema = z.object({
   origin: z.string().optional().nullable(),
   manufacturing_process: z.string().optional().nullable(),
   supplier_ids: z.array(z.string()).optional().nullable(),
+  category: z.string().optional().nullable(),
   primary_material: z.string().optional().nullable(),
   long_description: z.string().optional().nullable(),
   is_base_material: z.boolean().optional(),
