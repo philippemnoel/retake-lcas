@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/24/outline"
 import { useUser } from "@auth0/nextjs-auth0"
 import { useRouter } from "next/router"
-import { Badge, Button } from "@tremor/react"
+import { Badge, Button, Icon } from "@tremor/react"
 import classNames from "classnames"
 import { useIntercom } from "react-use-intercom"
 
@@ -202,38 +202,46 @@ export default ({
                   aria-label="Sidebar"
                   className="flex flex-col items-center space-y-3 py-6 pt-0"
                 >
-                  {mainNavigation.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className={classNames(
-                        "flex items-center rounded-lg p-4 text-gray-500 hover:bg-gray-100 relative",
-                        (pathname.startsWith(item.href) ||
-                          item.subPaths.includes(pathname)) &&
-                          "bg-indigo-100 text-indigo-600"
-                      )}
-                    >
-                      {decorations?.find(
-                        (decoration) => decoration.name === item.name
-                      )?.decoration !== undefined && (
-                        <div className="absolute top-0 right-0">
-                          <Badge
-                            size="xs"
-                            color="indigo"
-                            text={
-                              decorations
-                                ?.find(
-                                  (decoration) => decoration.name === item.name
-                                )
-                                ?.decoration?.toString() ?? "0"
-                            }
-                          />
-                        </div>
-                      )}
-                      <item.icon className="h-6 w-6" aria-hidden="true" />
-                      <span className="sr-only">{item.name}</span>
-                    </a>
-                  ))}
+                  {mainNavigation.map((item) => {
+                    const focused =
+                      pathname.startsWith(item.href) ||
+                      item.subPaths.includes(pathname)
+                    return (
+                      <a
+                        key={item.name}
+                        href={item.href}
+                        className={classNames(
+                          "flex items-center rounded-lg p-3 text-gray-500 relative"
+                        )}
+                      >
+                        {decorations?.find(
+                          (decoration) => decoration.name === item.name
+                        )?.decoration !== undefined && (
+                          <div className="absolute top-0 right-0">
+                            <Badge
+                              size="xs"
+                              color="indigo"
+                              text={
+                                decorations
+                                  ?.find(
+                                    (decoration) =>
+                                      decoration.name === item.name
+                                  )
+                                  ?.decoration?.toString() ?? "0"
+                              }
+                            />
+                          </div>
+                        )}
+                        <Icon
+                          icon={item.icon}
+                          tooltip={item.name}
+                          color={focused ? "indigo" : "zinc"}
+                          size="md"
+                          variant={focused ? "light" : "simple"}
+                        />
+                      </a>
+                    )
+                  })}
                 </nav>
               </div>
               <div className="pb-5 relative">

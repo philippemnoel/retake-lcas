@@ -4,6 +4,7 @@ import {
   CircleStackIcon,
   Square3Stack3DIcon,
   DocumentChartBarIcon,
+  ScaleIcon,
 } from "@heroicons/react/24/outline"
 
 import { isDevelopment } from "lib/utils"
@@ -132,6 +133,13 @@ const data = [
     : []),
 ]
 
+const compliance = [
+  {
+    name: "EPDs",
+    href: "/compliance/epd",
+  },
+]
+
 const main = [
   {
     name: "Data",
@@ -154,6 +162,16 @@ const main = [
   ...(isDevelopment
     ? [
         {
+          name: "Supply Chain Compliance",
+          href: "/compliance/epd",
+          icon: ScaleIcon,
+          subPaths: compliance.map((c) => c.href),
+        },
+      ]
+    : []),
+  ...(isDevelopment
+    ? [
+        {
           name: "Integrations",
           href: "/integrations",
           icon: Square3Stack3DIcon,
@@ -164,4 +182,4 @@ const main = [
   { name: "Settings", href: "/settings", icon: Cog8ToothIcon, subPaths: [] },
 ]
 
-export { main, product, facility, dashboard, reports, data }
+export { main, product, facility, dashboard, reports, compliance, data }

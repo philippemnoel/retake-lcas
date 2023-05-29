@@ -46,7 +46,7 @@ export default (props: Props) => {
         <div
           id="drawer-contact"
           className={classNames(
-            "fixed top-0 -right-96 z-40 h-screen py-4 px-6 overflow-y-hidden transition-transform w-96 bg-neutral-50",
+            "fixed top-0 -right-96 z-40 h-screen py-4 px-6 overflow-y-hidden transition-transform w-96 bg-neutral-50 bg-opacity-70 backdrop-blur",
             props.open ? "-translate-x-full" : "-translate-x-0"
           )}
           tabIndex={-1}
