@@ -20,7 +20,7 @@ export default async function handler(
 
     // There was some other error
     if (error !== null) {
-      console.error(`Error upserting table ${table}`, error, body)
+      console.error(`Error upserting table ${table}`, error)
 
       // There was a unique conflict
       if (error?.code === "23505") res.status(409).end()

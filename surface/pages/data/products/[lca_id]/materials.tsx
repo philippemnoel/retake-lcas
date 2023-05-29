@@ -3,7 +3,6 @@ import { useRouter } from "next/router"
 import { Title, Badge, Flex, Button } from "@tremor/react"
 import { PencilSquareIcon } from "@heroicons/react/24/outline"
 import { useUser } from "@auth0/nextjs-auth0"
-import { v4 as uuidv4 } from "uuid"
 
 import Layout from "@/components/layouts/sidebar"
 import MaterialsTable from "@/components/tables/materials"
@@ -28,6 +27,7 @@ import {
 } from "lib/api/upsert"
 import { formatNumber } from "lib/utils"
 import { MaterialCompositionDataSchema, PartsDataSchema } from "lib/api/schemas"
+import { withRetakePartId } from "lib/calculator/data"
 
 type ComponentDrawerDraft =
   | {
@@ -95,17 +95,6 @@ export default withAuth(() => {
     refresh()
   }
 
-  const withRetakePartId = <
-    T extends Record<string, any> & { retake_part_id?: string | null }
-  >(
-    values?: T
-  ): T => ({
-    ...(values as T),
-    retake_part_id:
-      values?.retake_part_id ??
-      `${values?.customer_part_id ?? uuidv4()}-${user?.org_id}`,
-  })
-
   if (lcaPart === undefined)
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -147,7 +136,10 @@ export default withAuth(() => {
             setComponentDrawerOpen(false)
           }}
           onSave={() => {
-            const partsData = withRetakePartId(componentDrawerDraft?.part)
+            const partsData = withRetakePartId(
+              componentDrawerDraft?.part,
+              user?.org_id
+            )
             withNotification([
               onSaveParts(partsData),
               onSaveMaterialComposition({

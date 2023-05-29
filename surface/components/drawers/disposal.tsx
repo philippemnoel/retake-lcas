@@ -77,7 +77,6 @@ export default ({
             <Text>
               <Flex>
                 <Bold>Disposal Type *</Bold>
-
                 <Icon
                   icon={QuestionMarkCircleIcon}
                   color="indigo"

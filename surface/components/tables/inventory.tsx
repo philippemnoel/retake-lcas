@@ -65,7 +65,7 @@ export default () => {
     Array<Partial<CMLPartsWithImpactsData>>
   >([])
   const [partsData, setPartsData] = useState<Partial<PartsData>>()
-  const [CMLPartsWithImpactsData, setCMLPartsWithImpactsData] =
+  const [partsWithImpactsData, setPartsWithImpactsData] =
     useState<Partial<CMLPartsWithImpactsData>>()
 
   const [suppliersDraft, setSuppliersDraft] =
@@ -158,7 +158,7 @@ export default () => {
 
   const onRowClick = (data: CMLPartsWithImpactsData) => {
     setPartsData(PartsDataSchema.optional().parse(data))
-    setCMLPartsWithImpactsData(data)
+    setPartsWithImpactsData(data)
     setShowPartDetailedDrawer(true)
     setSupplierToEngage({
       id: data.supplier_id ?? undefined,
@@ -167,9 +167,11 @@ export default () => {
     })
   }
 
-  const onSaveMaterial = async (values: Partial<SupplierData>) => {
-    await withNotification([upsertPart([values], user?.org_id)])
-    refreshParts()
+  const onSaveMaterial = async () => {
+    if (partsData) {
+      await withNotification([upsertPart([partsData], user?.org_id)])
+      refreshParts()
+    }
   }
 
   const onSaveSupplier = async (values?: Partial<SupplierData>) => {
@@ -239,19 +241,23 @@ export default () => {
     <div className="relative">
       <PartDrawer
         open={showPartDrawer}
-        setOpen={setShowPartDrawer}
+        onDismiss={() => setShowPartDrawer(false)}
         data={partsData}
+        onChange={(data) => {
+          setPartsData({ ...partsData, ...data })
+        }}
         onSave={onSaveMaterial}
-        suppliers={suppliers}
       />
       <PartsWithImpactsDrawer
         open={showPartDetailedDrawer}
-        setOpen={setShowPartDetailedDrawer}
-        defaults={partsData}
-        partsWithImpacts={CMLPartsWithImpactsData}
-        onSave={(value) => {
-          setPartsData(value)
-          onSaveMaterial(value)
+        onDismiss={() => setShowPartDetailedDrawer(false)}
+        partsData={partsData}
+        partsWithImpactsData={partsWithImpactsData}
+        onChangeParts={(data) => {
+          setPartsData({ ...partsData, ...data })
+        }}
+        onSave={() => {
+          onSaveMaterial()
         }}
         onEngageSupplier={() => {
           setShowPartDetailedDrawer(false)

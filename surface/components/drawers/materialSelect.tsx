@@ -12,12 +12,13 @@ import {
 import { Bars3BottomLeftIcon } from "@heroicons/react/24/outline"
 import classNames from "classnames"
 
-import materials from "lib/calculator/materials"
+import materialsMap from "lib/calculator/materials"
 import NumberInput from "../inputs/number"
 import {
   PartsData,
   MaterialCompositionData,
 } from "lib/types/supabase-row.types"
+import flatten from "lodash.flatten"
 
 type Props = {
   open: boolean
@@ -36,6 +37,8 @@ export default (props: Props) => {
     ? ((props.materialCompositionData?.weight_grams || 0) * 100) /
       props.maxWeight
     : 0
+
+  const materials = flatten(Object.values(materialsMap)).sort()
 
   return (
     <>

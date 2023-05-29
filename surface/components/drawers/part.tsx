@@ -10,41 +10,31 @@ import {
   Bold,
   SelectBox,
   SelectBoxItem,
-  MultiSelectBox,
 } from "@tremor/react"
 import { Bars3BottomLeftIcon } from "@heroicons/react/24/outline"
+import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid"
 import classNames from "classnames"
 
-import { PartsData, SupplierData } from "lib/types/supabase-row.types"
+import ConnectedCombobox from "../inputs/connectedSelectBox"
+import ConnectedMaterials from "@/components/inputs/connectedMaterials"
+
+import { PartsData } from "lib/types/supabase-row.types"
 import { regions } from "lib/calculator/factors"
-import materials from "lib/calculator/materials"
 
-export default ({
-  open,
-  setOpen,
-  onSave,
-  data,
-  suppliers,
-}: {
+type Props = {
   open: boolean
-  setOpen: (open: boolean) => void
-  onSave: (value: Partial<PartsData>) => void
+  onDismiss: () => void
+  onSave: () => void
   data: Partial<PartsData> | undefined
-  suppliers: Array<SupplierData> | undefined
-}) => {
-  const [values, setValues] = useState(data)
+  onChange: (data: Partial<PartsData>) => void
+}
 
-  const onChange = (key: keyof PartsData, value: any) => {
-    const clonedValues = { ...values } ?? {}
-    clonedValues[key] = value
-    setValues(clonedValues)
-  }
-
-  const hasCustomerPartId = !(data?.primary_material && !data?.customer_part_id)
+export default (props: Props) => {
+  const [drawerHasOpenedOnce, setDrawerHasOpenedOnce] = useState(false)
 
   useEffect(() => {
-    setValues(data)
-  }, [data])
+    if (props.open) setDrawerHasOpenedOnce(true)
+  }, [props.open])
 
   return (
     <>
@@ -53,7 +43,7 @@ export default ({
           id="drawer-contact"
           className={classNames(
             "fixed top-0 left-0 z-40 h-screen py-4 px-6 overflow-y-hidden transition-transform w-80 bg-neutral-50 bg-opacity-70 backdrop-blur-md",
-            open ? "translate-x-0" : "-translate-x-full"
+            props.open ? "translate-x-0" : "-translate-x-full"
           )}
           tabIndex={-1}
           aria-labelledby="drawer-contact-label"
@@ -70,122 +60,109 @@ export default ({
               </Flex>
             </div>
             <Divider />
-            <Text truncate={true}>
-              <Bold>Identifier or SKU *</Bold>
-            </Text>
-            {data?.customer_part_id ? (
-              <Text marginTop="mt-1">{values?.customer_part_id}</Text>
-            ) : (
+            <div className="max-h-[calc(100vh-12rem)] overflow-y-scroll">
+              <Text color="indigo">
+                <Bold>Required Fields</Bold>
+              </Text>
+              <Text truncate={true} marginTop="mt-2">
+                <Bold>Identifier or SKU *</Bold>
+              </Text>
+              {props.data?.customer_part_id ? (
+                <Text marginTop="mt-1">{props.data?.customer_part_id}</Text>
+              ) : (
+                <TextInput
+                  marginTop="mt-1"
+                  value={props.data?.customer_part_id?.toString() ?? ""}
+                  onChange={(event) =>
+                    props.onChange({ customer_part_id: event.target.value })
+                  }
+                  placeholder="SKU-123456"
+                />
+              )}
+              <Text marginTop="mt-4">
+                <Bold>Description *</Bold>
+              </Text>
               <TextInput
                 marginTop="mt-1"
-                value={values?.customer_part_id?.toString() ?? ""}
+                value={props.data?.part_description?.toString() ?? ""}
                 onChange={(event) =>
-                  onChange("customer_part_id", event.target.value)
+                  props.onChange({ part_description: event.target.value })
                 }
-                placeholder="SKU-123456"
+                placeholder="Steel Bar"
               />
-            )}
-            <Text marginTop="mt-4">
-              <Bold>Description *</Bold>
-            </Text>
-            <TextInput
-              marginTop="mt-1"
-              value={values?.part_description?.toString() ?? ""}
-              onChange={(event) =>
-                onChange("part_description", event.target.value)
-              }
-              placeholder="Steel Bar"
-            />
-            <Text marginTop={hasCustomerPartId ? "mt-4" : "mt-0"}>
-              <Bold>Default Origin</Bold>
-            </Text>
-            {regions && (
-              <SelectBox
-                marginTop="mt-1"
-                value={values?.origin}
-                onValueChange={(value) => onChange("origin", value)}
-              >
-                {regions?.map((region, index) => (
-                  <SelectBoxItem
-                    text={region.name}
-                    value={region.name}
-                    key={index}
-                  />
-                ))}
-              </SelectBox>
-            )}
-            <Text marginTop="mt-4">
-              <Flex>
-                <Bold>Material</Bold>
-                {values?.primary_material && (
-                  <Button
-                    text="Remove"
+              <Divider />
+              <Text color="indigo">
+                <Flex>
+                  <Bold>Optional Fields</Bold>
+                  <Icon
+                    icon={QuestionMarkCircleIcon}
                     color="indigo"
-                    variant="light"
-                    onClick={() => {
-                      onChange("primary_material", null)
-                    }}
+                    variant="simple"
+                    tooltip="These fields are not required but will help Retake find a more precise emissions factor."
                   />
-                )}
-              </Flex>
-            </Text>
-            <SelectBox
-              marginTop="mt-1"
-              onValueChange={(value) => onChange("primary_material", value)}
-              value={values?.primary_material}
-              placeholder="Optional"
-            >
-              {
-                materials?.map((material, index) => (
-                  <SelectBoxItem text={material} value={material} key={index} />
-                )) as any
-              }
-            </SelectBox>
-            {suppliers && (
-              <>
-                <Text marginTop="mt-4">
-                  <Bold>Suppliers</Bold>
-                </Text>
-                <MultiSelectBox
+                </Flex>
+              </Text>
+              <Text marginTop="mt-1">
+                <Bold>Default Origin</Bold>
+              </Text>
+              {regions && (
+                <SelectBox
                   marginTop="mt-1"
-                  value={values?.supplier_ids ?? []}
-                  onValueChange={(value) => {
-                    onChange("supplier_ids", value)
-                  }}
+                  value={props.data?.origin}
+                  onValueChange={(value) => props.onChange({ origin: value })}
                 >
-                  {
-                    suppliers?.map((supplier, index) => (
-                      <SelectBoxItem
-                        text={supplier.name ?? ""}
-                        value={supplier.id}
-                        key={index}
-                      />
-                    )) as any
-                  }
-                </MultiSelectBox>
-              </>
-            )}
+                  {regions?.map((region, index) => (
+                    <SelectBoxItem
+                      text={region.name}
+                      value={region.name}
+                      key={index}
+                    />
+                  ))}
+                </SelectBox>
+              )}
+              <ConnectedMaterials
+                data={props.data}
+                onChange={props.onChange}
+                marginTop="mt-4"
+              />
+
+              <Text marginTop="mt-4">
+                <Bold>Suppliers</Bold>
+              </Text>
+              {drawerHasOpenedOnce && (
+                <ConnectedCombobox
+                  marginTop="mt-1"
+                  endpoint="/api/bulk/suppliers"
+                  selected={props.data?.supplier_ids ?? []}
+                  onChange={(value) => props.onChange({ supplier_ids: value })}
+                  keyField="id"
+                  displayField="name"
+                  placeholder="Type to search from suppliers"
+                  multiple={true}
+                />
+              )}
+              <div className="py-16"></div>
+            </div>
+
             <div className="absolute bottom-0">
               <Flex spaceX="space-x-6">
                 <Button
                   text="Save"
                   color="indigo"
                   disabled={[
-                    values?.customer_part_id,
-                    values?.part_description,
+                    props.data?.customer_part_id,
+                    props.data?.part_description,
                   ].some((value) => value === undefined)}
                   onClick={() => {
-                    onSave({
-                      ...values,
-                    })
-                    setOpen(false)
+                    props.onSave()
+                    props.onDismiss()
                   }}
                 />
                 <Button
                   text="Close"
                   color="indigo"
                   variant="light"
-                  onClick={() => setOpen(false)}
+                  onClick={props.onDismiss}
                 />
               </Flex>
             </div>

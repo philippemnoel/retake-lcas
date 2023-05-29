@@ -69,15 +69,17 @@ export default ({
           const materialCompositionID = uuidv4()
 
           childParts.push({
-            manufacturing_process: row.manufacturing_process?.toString(),
+            manufacturing_process:
+              row.manufacturing_process?.toString() ?? null,
             origin: row.origin?.toString(),
             supplier_ids: row.supplier
               ? [`${row.supplier?.toString()}-${user?.org_id}`]
               : null,
-            part_description: row.child_description?.toString(),
+            part_description: row.child_description?.toString() ?? null,
             retake_part_id: childRetakePartID,
-            customer_part_id: row.child_part_id?.toString(),
-            primary_material: row.material?.toString(),
+            customer_part_id: row.child_part_id?.toString() ?? null,
+            primary_material: row.material?.toString() ?? null,
+            category: row.category?.toString() ?? null,
           })
 
           parentParts.push({

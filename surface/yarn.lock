@@ -1463,6 +1463,13 @@
   dependencies:
     "@types/lodash" "*"
 
+"@types/lodash.findkey@^4.6.7":
+  version "4.6.7"
+  resolved "https://registry.yarnpkg.com/@types/lodash.findkey/-/lodash.findkey-4.6.7.tgz#2193df51c84fea14072d0896fa0d289fedcac893"
+  integrity sha512-huAfe0SuQT2gnF37C/C7xiMSWZDeD8bGveTYQuF4UkRBFdzO1coSFHwucK5b4SUiBDW1mH9c7uTJ4VokATo3aw==
+  dependencies:
+    "@types/lodash" "*"
+
 "@types/lodash.flatten@^4.4.7":
   version "4.4.7"
   resolved "https://registry.npmjs.org/@types/lodash.flatten/-/lodash.flatten-4.4.7.tgz"
@@ -5084,6 +5091,11 @@ lodash.dropright@^4.1.1:
   version "4.1.1"
   resolved "https://registry.npmjs.org/lodash.dropright/-/lodash.dropright-4.1.1.tgz"
   integrity sha512-y746j5VJPiu/8w583fU9HzoB71/PE+lmLdnc/gkbPjsQEMMZVjWIYV6cmlrZeCpgtckSnnDG7HdwS2ciHi8Mww==
+
+lodash.findkey@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/lodash.findkey/-/lodash.findkey-4.6.0.tgz#83058e903b51cbb759d09ccf546dea3ea39c4718"
+  integrity sha512-Y+f2R8KsUDJVqdfeai01P5A1IQeMWsMG1p0rghzdhIl7TIap47Y2Z5UJK8x4pstixNL56KVHFRE1IW9jvRwy4g==
 
 lodash.flatten@^4.4.0:
   version "4.4.0"

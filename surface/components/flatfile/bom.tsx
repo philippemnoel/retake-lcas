@@ -57,14 +57,18 @@ export default ({
     for (const row of rows) {
       const materialCompositionID = uuidv4()
 
-      const part = withRetakePartId({
-        manufacturing_process: row.manufacturing_process?.toString() ?? null,
-        origin: row.origin?.toString() ?? null,
-        supplier_ids: row.supplier ? [`${row.supplier}-${user?.org_id}`] : [],
-        part_description: row.description?.toString() ?? null,
-        customer_part_id: row.part_id?.toString() ?? null,
-        primary_material: row.material?.toString() ?? null,
-      })
+      const part = withRetakePartId(
+        {
+          manufacturing_process: row.manufacturing_process?.toString() ?? null,
+          origin: row.origin?.toString() ?? null,
+          supplier_ids: row.supplier ? [`${row.supplier}-${user?.org_id}`] : [],
+          part_description: row.description?.toString() ?? null,
+          customer_part_id: row.part_id?.toString() ?? null,
+          primary_material: row.material?.toString() ?? null,
+          category: row.category?.toString() ?? null,
+        },
+        user?.org_id
+      )
 
       const materialComposition = {
         weight_grams: row.weight_kilograms
@@ -84,6 +88,7 @@ export default ({
     }
 
     parts = uniqBy(parts, "retake_part_id")
+
     const suppliers = uniqBy(rows, "supplier")
       .filter((row) => (row?.supplier ?? "") !== "")
       .map((row) => ({

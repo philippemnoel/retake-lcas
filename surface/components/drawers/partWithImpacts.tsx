@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react"
 import {
   Button,
   Title,
@@ -15,86 +14,34 @@ import {
   SelectBoxItem,
 } from "@tremor/react"
 import { Bars3BottomLeftIcon, EnvelopeIcon } from "@heroicons/react/24/outline"
+import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid"
 import classNames from "classnames"
 
 import ConnectedCombobox from "@/components/inputs/connectedSelectBox"
-import { useQuery } from "@/components/hooks"
+import ImpactBadge from "@/components/badges/impact"
 
-import { Database } from "lib/types/database.types"
-import ImpactBadge from "../badges/impact"
 import { regions } from "lib/calculator/factors"
-import materials from "lib/calculator/materials"
+import {
+  CMLPartsWithImpactsData,
+  PartsData,
+} from "lib/types/supabase-row.types"
+import ConnectedMaterials from "../inputs/connectedMaterials"
 
-const defaultsToValues = (
-  defaults:
-    | Partial<Database["public"]["Views"]["cml_parts_with_impacts"]["Row"]>
-    | undefined
-): Partial<Database["public"]["Tables"]["parts"]["Row"]> => ({
-  retake_part_id: defaults?.retake_part_id ?? undefined,
-  customer_part_id: defaults?.customer_part_id ?? undefined,
-  part_description: defaults?.part_description ?? undefined,
-  origin: defaults?.origin ?? undefined,
-  org_id: defaults?.org_id ?? undefined,
-  manufacturing_process: defaults?.manufacturing_process ?? undefined,
-  primary_material: defaults?.primary_material ?? undefined,
-  created_at: defaults?.created_at ?? undefined,
-})
-
-export default ({
-  open,
-  setOpen,
-  onSave,
-  onCreateSupplier,
-  onEngageSupplier,
-  defaults,
-  partsWithImpacts,
-}: {
+type Props = {
   open: boolean
-  setOpen: (open: boolean) => void
-  onSave: (value: Partial<Database["public"]["Tables"]["parts"]["Row"]>) => void
-  defaults:
-    | Partial<Database["public"]["Views"]["cml_parts_with_impacts"]["Row"]>
-    | undefined
-  partsWithImpacts:
-    | Partial<Database["public"]["Views"]["cml_parts_with_impacts"]["Row"]>
-    | undefined
+  partsData: Partial<PartsData> | undefined
+  partsWithImpactsData: Partial<CMLPartsWithImpactsData> | undefined
+  onDismiss: () => void
+  onSave: () => void
+  onChangeParts: (data: Partial<PartsData>) => void
   onCreateSupplier: () => void
   onEngageSupplier: () => void
-}) => {
-  const { data: defaultSupplierIds, refresh: refreshDefaultSupplierIds } =
-    useQuery<Database["public"]["Tables"]["parts"]["Row"]>("parts", {
-      retake_part_id: defaults?.retake_part_id,
-    })
+}
 
-  const [values, setValues] = useState(defaultsToValues(defaults))
-
-  const onChange = (
-    key: keyof Database["public"]["Tables"]["parts"]["Row"],
-    value: any
-  ) => {
-    const clonedValues = { ...values } ?? {}
-    clonedValues[key] = value
-    setValues(clonedValues)
-  }
-
-  const { data: allSuppliers, refresh: refreshSuppliers } =
-    useQuery<Database["public"]["Tables"]["suppliers"]["Row"]>("suppliers")
-
+export default (props: Props) => {
   const hasCustomerPartId = !(
-    defaults?.primary_material && !defaults?.customer_part_id
+    props.partsData?.primary_material && !props.partsData?.customer_part_id
   )
-
-  useEffect(() => {
-    setValues(defaultsToValues(defaults))
-    refreshSuppliers()
-    refreshDefaultSupplierIds()
-  }, [defaults])
-
-  useEffect(() => {
-    const supplierIds = defaultSupplierIds?.[0]?.supplier_ids
-
-    if (supplierIds) onChange("supplier_ids", supplierIds)
-  }, [defaultSupplierIds])
 
   return (
     <>
@@ -103,7 +50,7 @@ export default ({
           id="drawer-contact"
           className={classNames(
             "fixed top-0 left-0 z-40 h-screen py-4 px-6 overflow-y-hidden transition-transform w-[45rem] bg-neutral-50 bg-opacity-70 backdrop-blur-md",
-            open ? "translate-x-0" : "-translate-x-full"
+            props.open ? "translate-x-0" : "-translate-x-full"
           )}
           tabIndex={-1}
           aria-labelledby="drawer-contact-label"
@@ -118,8 +65,8 @@ export default ({
                 />
                 <div className="max-w-xs">
                   <Title truncate={true}>
-                    {defaults?.part_description ??
-                      defaults?.customer_part_id ??
+                    {props.partsData?.part_description ??
+                      props.partsData?.customer_part_id ??
                       "Component"}
                   </Title>
                 </div>
@@ -129,26 +76,35 @@ export default ({
                 icon={EnvelopeIcon}
                 variant="light"
                 color="indigo"
-                onClick={onEngageSupplier}
-                disabled={defaults?.supplier_id === null}
+                onClick={props.onEngageSupplier}
+                disabled={(props.partsData?.supplier_ids ?? []).length === 0}
               />
             </div>
             <Divider />
             <ColGrid numCols={2}>
               <Col numColSpan={1}>
+                <Text color="indigo">
+                  <Bold>Required Fields</Bold>
+                </Text>
                 {hasCustomerPartId && (
                   <>
-                    <Text truncate={true}>
+                    <Text truncate={true} marginTop="mt-2">
                       <Bold>Identifier or SKU</Bold>
                     </Text>
-                    {defaults?.customer_part_id ? (
-                      <Text marginTop="mt-1">{values?.customer_part_id}</Text>
+                    {props.partsData?.customer_part_id ? (
+                      <Text marginTop="mt-1">
+                        {props.partsData?.customer_part_id}
+                      </Text>
                     ) : (
                       <TextInput
                         marginTop="mt-1"
-                        value={values?.customer_part_id?.toString() ?? ""}
+                        value={
+                          props.partsData?.customer_part_id?.toString() ?? ""
+                        }
                         onChange={(event) =>
-                          onChange("customer_part_id", event.target.value)
+                          props.onChangeParts({
+                            customer_part_id: event.target.value,
+                          })
                         }
                         placeholder="SKU-123456"
                       />
@@ -158,22 +114,40 @@ export default ({
                     </Text>
                     <TextInput
                       marginTop="mt-1"
-                      value={values?.part_description?.toString() ?? ""}
+                      value={
+                        props.partsData?.part_description?.toString() ?? ""
+                      }
                       onChange={(event) =>
-                        onChange("part_description", event.target.value)
+                        props.onChangeParts({
+                          part_description: event.target.value,
+                        })
                       }
                       placeholder="Widget Subcomponent"
                     />
                   </>
                 )}
-                <Text marginTop={hasCustomerPartId ? "mt-4" : "mt-0"}>
+                <Divider />
+                <Text color="indigo">
+                  <Flex>
+                    <Bold>Optional Fields</Bold>
+                    <Icon
+                      icon={QuestionMarkCircleIcon}
+                      color="indigo"
+                      variant="simple"
+                      tooltip="These fields are not required but will help Retake find a more precise emissions factor."
+                    />
+                  </Flex>
+                </Text>
+                <Text marginTop="mt-1">
                   <Bold>Default Origin</Bold>
                 </Text>
                 {regions && (
                   <SelectBox
                     marginTop="mt-1"
-                    value={values?.origin}
-                    onValueChange={(value) => onChange("origin", value)}
+                    value={props.partsData?.origin}
+                    onValueChange={(value) =>
+                      props.onChangeParts({ origin: value })
+                    }
                     placeholder="Type to search from list"
                   >
                     {regions?.map((region, index) => (
@@ -185,37 +159,11 @@ export default ({
                     ))}
                   </SelectBox>
                 )}
-                <Text marginTop="mt-4">
-                  <Flex>
-                    <Bold>Material</Bold>
-                    {values?.primary_material && (
-                      <Button
-                        text="Remove"
-                        color="indigo"
-                        variant="light"
-                        onClick={() => {
-                          onChange("primary_material", null)
-                        }}
-                      />
-                    )}
-                  </Flex>
-                </Text>
-                <SelectBox
-                  marginTop="mt-1"
-                  onValueChange={(value) => onChange("primary_material", value)}
-                  value={values?.primary_material}
-                  placeholder="Type to search from list"
-                >
-                  {
-                    materials?.map((material, index) => (
-                      <SelectBoxItem
-                        text={material}
-                        value={material}
-                        key={index}
-                      />
-                    )) as any
-                  }
-                </SelectBox>
+                <ConnectedMaterials
+                  data={props.partsData}
+                  onChange={props.onChangeParts}
+                  marginTop="mt-4"
+                />
                 <Text marginTop="mt-4">
                   <Flex>
                     <Bold>Suppliers</Bold>
@@ -223,41 +171,39 @@ export default ({
                       text="Create New Supplier"
                       variant="light"
                       color="indigo"
-                      onClick={onCreateSupplier}
+                      onClick={props.onCreateSupplier}
                     />
                   </Flex>
                 </Text>
-                {allSuppliers && (
-                  <ConnectedCombobox
-                    endpoint="/api/bulk/suppliers"
-                    selected={values?.supplier_ids ?? []}
-                    onChange={(value: any) => onChange("supplier_ids", value)}
-                    keyField="id"
-                    displayField="name"
-                    multiple={true}
-                  />
-                )}
+                <ConnectedCombobox
+                  endpoint="/api/bulk/suppliers"
+                  selected={props.partsData?.supplier_ids ?? []}
+                  onChange={(value: any) =>
+                    props.onChangeParts({ supplier_ids: value })
+                  }
+                  keyField="id"
+                  displayField="name"
+                  multiple={true}
+                />
                 <div className="absolute bottom-0">
                   <Flex spaceX="space-x-6">
                     <Button
                       text="Save"
                       color="indigo"
                       disabled={[
-                        values?.customer_part_id,
-                        values?.part_description,
+                        props.partsData?.customer_part_id,
+                        props.partsData?.part_description,
                       ].some((value) => value === undefined)}
                       onClick={() => {
-                        onSave({
-                          ...values,
-                        })
-                        setOpen(false)
+                        props.onSave()
+                        props.onDismiss()
                       }}
                     />
                     <Button
                       text="Close"
                       color="indigo"
                       variant="light"
-                      onClick={() => setOpen(false)}
+                      onClick={props.onDismiss}
                     />
                   </Flex>
                 </div>
@@ -270,10 +216,10 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.global_warming}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={props.partsWithImpactsData?.global_warming}
                       isLeaf={true}
                       unit="kg CO2-Eq / kg"
                     />
@@ -282,10 +228,10 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.abiotic_depletion}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={props.partsWithImpactsData?.abiotic_depletion}
                       isLeaf={true}
                       unit="MJ / kg"
                     />
@@ -294,10 +240,13 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.abiotic_depletion_fossil_fuels}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={
+                        props.partsWithImpactsData
+                          ?.abiotic_depletion_fossil_fuels
+                      }
                       isLeaf={true}
                       unit="MJ / kg"
                     />
@@ -306,10 +255,10 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.acidification}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={props.partsWithImpactsData?.acidification}
                       isLeaf={true}
                       unit="kgSO2e / kg"
                     />
@@ -318,10 +267,10 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.eutrophication}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={props.partsWithImpactsData?.eutrophication}
                       isLeaf={true}
                       unit="kgPO4e / kg"
                     />
@@ -330,10 +279,12 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.freshwater_ecotoxicity}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={
+                        props.partsWithImpactsData?.freshwater_ecotoxicity
+                      }
                       isLeaf={true}
                       unit="kg 1,4-DB e / kg"
                     />
@@ -342,10 +293,10 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.human_toxicity}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={props.partsWithImpactsData?.human_toxicity}
                       isLeaf={true}
                       unit="kg 1,4-DB e / kg"
                     />
@@ -354,10 +305,10 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.marine_ecotoxicity}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={props.partsWithImpactsData?.marine_ecotoxicity}
                       isLeaf={true}
                       unit="kg 1,4-DB e / kg"
                     />
@@ -366,10 +317,10 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.ozone_depletion}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={props.partsWithImpactsData?.ozone_depletion}
                       isLeaf={true}
                       unit="kg CFC-11 e / kg"
                     />
@@ -378,10 +329,12 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.photochemical_ozone_creation}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={
+                        props.partsWithImpactsData?.photochemical_ozone_creation
+                      }
                       isLeaf={true}
                       unit="kgC2H4e / kg"
                     />
@@ -390,10 +343,12 @@ export default ({
                     </Text>
                     <ImpactBadge
                       marginTop="mt-1"
-                      database={partsWithImpacts?.database_name}
-                      activity={partsWithImpacts?.activity_name}
-                      source={partsWithImpacts?.impact_source}
-                      impact={partsWithImpacts?.terrestrial_ecotoxicity}
+                      database={props.partsWithImpactsData?.database_name}
+                      activity={props.partsWithImpactsData?.activity_name}
+                      source={props.partsWithImpactsData?.impact_source}
+                      impact={
+                        props.partsWithImpactsData?.terrestrial_ecotoxicity
+                      }
                       isLeaf={true}
                       unit="kg 1,4-DB e / kg"
                     />
