@@ -1,6 +1,6 @@
-# Retake Monorepo
+# Retake LCA Calculator
 
-This repository contains all the code necessary to run the Retake web app, excluding forked dependencies, following a monorepo structure.
+The Retake LCA Calculator is a web application built to import Bills of Materials (BOMs) from which to map emmission factors and calculate overall product footprints across the full lifecycle of a specific part of product.
 
 ## Repository Structure
 
